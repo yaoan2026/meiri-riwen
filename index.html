@@ -156,6 +156,33 @@
   .pv{font-family:var(--jp);font-size:14px;color:var(--sub);min-height:20px;padding:0 4px}
   .two{display:grid;grid-template-columns:1fr 2fr;gap:8px}
   .two .btn2{margin:0}
+  .row[data-id]{cursor:pointer}
+  .row[data-id]:active{background:var(--s2)}
+  .chev{color:var(--dim);font-size:18px;margin-left:-4px}
+  mark{background:none;color:var(--flame);font-weight:700}
+  .fex{margin-top:16px;padding:12px 14px;background:var(--s2);border-radius:12px;text-align:left}
+  .fex .exjp{font-family:var(--jp);font-size:15px;line-height:1.6}
+  .fex .exzh{font-size:12px;color:var(--sub);margin-top:3px}
+  .sheet{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center}
+  .sbg{position:absolute;inset:0;background:rgba(0,0,0,.55);animation:fade .2s}
+  .spanel{position:relative;width:100%;max-width:440px;background:var(--s1);border-radius:22px 22px 0 0;padding:10px 20px calc(26px + env(safe-area-inset-bottom));animation:up .22s ease-out;max-height:85dvh;overflow:auto}
+  @keyframes up{from{transform:translateY(40px);opacity:0}} @keyframes fade{from{opacity:0}}
+  .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 16px}
+  .dtop{display:flex;align-items:flex-start;gap:10px}
+  .djp{font-family:var(--jp);font-size:34px;font-weight:700;line-height:1.3;flex:1}
+  .djp.long{font-size:22px}
+  .dkana{font-family:var(--jp);color:#aab0bb;font-size:16px;margin-top:4px}
+  .dtools{display:flex;gap:2px}
+  .dtools button,.exsay{padding:8px;color:var(--sub)}
+  .dtools svg,.exsay svg{width:20px;height:20px}
+  .dtools .bm{color:var(--blue)}
+  .dzh{font-size:19px;font-weight:600;margin-top:10px}
+  .dlbl{font-size:12px;color:var(--sub);letter-spacing:.06em;margin:22px 0 8px}
+  .dex{background:var(--s2);border-radius:14px;padding:14px 10px 14px 16px;display:flex;gap:6px;align-items:flex-start}
+  .dex .exjp{font-family:var(--jp);font-size:17px;line-height:1.65;flex:1}
+  .dex .exzh{font-size:13px;color:var(--sub);margin-top:6px}
+  .exsay{flex:none;margin-top:-2px}
+  .dst{font-size:12px;color:var(--dim);margin-top:18px}
   .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--s2);color:var(--ink);font-size:13px;padding:10px 14px;border-radius:12px;max-width:340px;text-align:center;z-index:20;box-shadow:0 6px 24px rgba(0,0,0,.4)}
 
   .finish{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
@@ -270,6 +297,7 @@
         <div class="ans hidden" id="ans">
           <div class="kana" id="fkana"></div>
           <div class="zh" id="fzh"></div>
+          <div class="fex hidden" id="fex"></div>
         </div>
         <div class="verdict hidden" id="verdict"></div>
       </div>
@@ -286,33 +314,114 @@
       <button class="btn" id="back">完成</button>
     </div>
   </div>
+  <!-- ===== 單字詳細頁 ===== -->
+  <div class="sheet hidden" id="sheet">
+    <div class="sbg" id="sbg"></div>
+    <div class="spanel">
+      <div class="grab"></div>
+      <div class="dtop">
+        <div style="flex:1;min-width:0"><div class="djp" id="dJp"></div><div class="dkana" id="dKana"></div></div>
+        <div class="dtools"><button id="dSay" aria-label="發音"></button><button class="bm" id="dBm" aria-label="收藏"></button></div>
+      </div>
+      <div class="dzh" id="dZh"></div>
+      <div id="dExBox">
+        <div class="dlbl">例句</div>
+        <div class="dex">
+          <div style="flex:1"><div class="exjp" id="dEx"></div><div class="exzh" id="dExZh"></div></div>
+          <button class="exsay" id="dExSay" aria-label="例句發音"></button>
+        </div>
+      </div>
+      <div class="dst" id="dSt"></div>
+    </div>
+  </div>
+
   <div class="toast hidden" id="toast"></div>
 </div>
 
 <script>
 /* ================= 內容（N4–N3） ================= */
-// [日文, 讀音(全假名時留空), 中文]
 const VOCAB = [
-["経験","けいけん","經驗"],["準備","じゅんび","準備"],["予定","よてい","預定、計畫"],["連絡","れんらく","聯絡"],
-["相談","そうだん","商量、諮詢"],["説明","せつめい","說明"],["約束","やくそく","約定"],["遠慮","えんりょ","客氣、顧慮"],
-["我慢","がまん","忍耐、忍住"],["心配","しんぱい","擔心"],["安心","あんしん","安心"],["残念","ざんねん","可惜、遺憾"],
-["丁寧","ていねい","有禮貌；仔細"],["複雑","ふくざつ","複雜"],["簡単","かんたん","簡單"],["必要","ひつよう","必要"],
-["大切","たいせつ","重要、珍惜"],["特別","とくべつ","特別"],["普通","ふつう","普通、一般"],["自由","じゆう","自由"],
-["集める","あつめる","收集"],["比べる","くらべる","比較"],["調べる","しらべる","調查、查"],["決める","きめる","決定"],
-["続ける","つづける","繼續"],["届ける","とどける","送達、提交"],["慣れる","なれる","習慣、熟悉"],["間に合う","まにあう","來得及、趕上"],
-["片付ける","かたづける","整理、收拾"],["手伝う","てつだう","幫忙"],["謝る","あやまる","道歉"],["断る","ことわる","拒絕"],
-["頼む","たのむ","拜託；點（餐）"],["迷う","まよう","迷路；猶豫"],["探す","さがす","尋找"],["増える","ふえる","增加"],
-["減る","へる","減少"],["壊れる","こわれる","壞掉"],["汚れる","よごれる","弄髒"],["冷める","さめる","變涼；（熱情）冷卻"],
-["遅れる","おくれる","遲到、延誤"],["失敗","しっぱい","失敗"],["成功","せいこう","成功"],["習慣","しゅうかん","習慣"],
-["趣味","しゅみ","興趣"],["機会","きかい","機會"],["理由","りゆう","理由"],["意味","いみ","意思、意義"],
-["気持ち","きもち","心情、感覺"],["様子","ようす","樣子、情況"],["場合","ばあい","情況、場合"],["都合","つごう","方便與否、安排"],
-["具合","ぐあい","（身體等的）狀況"],["締め切り","しめきり","截止期限"],["残業","ざんぎょう","加班"],["給料","きゅうりょう","薪水"],
-["会議","かいぎ","會議"],["引っ越し","ひっこし","搬家"],["家賃","やちん","房租"],["近所","きんじょ","附近、鄰居"],
-["お釣り","おつり","找零"],["領収書","りょうしゅうしょ","收據"],["乗り換え","のりかえ","轉乘"],["渋滞","じゅうたい","塞車"],
-["天気予報","てんきよほう","天氣預報"],["すっかり","","完全地、徹底地"],["なかなか","","相當；（接否定）總是不…"],["ちゃんと","","好好地、確實地"],
-["やっぱり","","果然；還是"],["せっかく","","難得、特地"],["ついでに","","順便"],["たまに","","偶爾"],
-["ずっと","","一直；…得多"],["もうすぐ","","快要、即將"],["さっき","","剛才"],["なるべく","","盡量"],
-["きっと","","一定"],["わざわざ","","特地、專程"],["うっかり","","不小心、一時疏忽"],["ぎりぎり","","勉強、剛好趕上"],
+// [日文, 讀音(全假名時留空), 中文, 例句, 例句翻譯]
+["経験","けいけん","經驗","海外で働いた経験があります。","我有在國外工作的經驗。"],
+["準備","じゅんび","準備","旅行の準備はもうできましたか。","旅行的準備已經好了嗎？"],
+["予定","よてい","預定、計畫","今週の土曜日は何か予定がありますか。","這週六有什麼安排嗎？"],
+["連絡","れんらく","聯絡","着いたら連絡してください。","到了請跟我聯絡。"],
+["相談","そうだん","商量、諮詢","将来のことを先生に相談しました。","我跟老師商量了將來的事。"],
+["説明","せつめい","說明","もう一度説明してもらえませんか。","可以再說明一次嗎？"],
+["約束","やくそく","約定","友達と駅で会う約束をしました。","我跟朋友約好在車站見面。"],
+["遠慮","えんりょ","客氣、顧慮","遠慮しないで、たくさん食べてね。","別客氣，多吃一點喔。"],
+["我慢","がまん","忍耐、忍住","眠いけど、もう少し我慢します。","雖然很睏，再忍一下。"],
+["心配","しんぱい","擔心","母はいつも私のことを心配しています。","媽媽總是在擔心我。"],
+["安心","あんしん","安心","無事に着いたと聞いて安心しました。","聽到你平安抵達就放心了。"],
+["残念","ざんねん","可惜、遺憾","雨で試合が中止になって残念です。","比賽因雨取消，真可惜。"],
+["丁寧","ていねい","有禮貌；仔細","店員さんが丁寧に説明してくれました。","店員很仔細地為我說明。"],
+["複雑","ふくざつ","複雜","この問題は思ったより複雑です。","這個問題比想像中複雜。"],
+["簡単","かんたん","簡單","この料理は簡単に作れます。","這道菜很容易做。"],
+["必要","ひつよう","必要","申し込みにはパスポートが必要です。","申請需要護照。"],
+["大切","たいせつ","重要、珍惜","健康が一番大切だと思います。","我覺得健康最重要。"],
+["特別","とくべつ","特別","今日は特別な日なので、ケーキを買いました。","今天是特別的日子，所以買了蛋糕。"],
+["普通","ふつう","普通、一般","普通は電車で会社に行きます。","平常我搭電車去公司。"],
+["自由","じゆう","自由","午後は自由に使っていいですよ。","下午可以自由運用喔。"],
+["集める","あつめる","收集","子どもの頃、切手を集めていました。","小時候我有在收集郵票。"],
+["比べる","くらべる","比較","去年と比べて、物価が高くなりました。","跟去年比起來，物價變高了。"],
+["調べる","しらべる","調查、查","分からない言葉は辞書で調べます。","不懂的詞我會查字典。"],
+["決める","きめる","決定","夏休みにどこへ行くか、まだ決めていません。","還沒決定暑假要去哪裡。"],
+["続ける","つづける","繼續","毎日少しずつ日本語の勉強を続けています。","我每天持續一點一點地學日文。"],
+["届ける","とどける","送達、提交","拾った財布を交番に届けました。","我把撿到的錢包送到派出所了。"],
+["慣れる","なれる","習慣、熟悉","日本の生活にはもう慣れましたか。","已經習慣日本的生活了嗎？"],
+["間に合う","まにあう","來得及、趕上","急げば、終電に間に合います。","趕快的話，來得及搭末班車。"],
+["片付ける","かたづける","整理、收拾","出かける前に部屋を片付けてね。","出門前把房間收拾好喔。"],
+["手伝う","てつだう","幫忙","引っ越しを手伝ってくれてありがとう。","謝謝你幫我搬家。"],
+["謝る","あやまる","道歉","遅れたことをちゃんと謝りました。","我為遲到的事好好道歉了。"],
+["断る","ことわる","拒絕","忙しかったので、誘いを断りました。","因為很忙，所以拒絕了邀約。"],
+["頼む","たのむ","拜託；點（餐）","同僚に資料のコピーを頼みました。","我拜託同事幫忙影印資料。"],
+["迷う","まよう","迷路；猶豫","どちらを買うか迷っています。","我在猶豫要買哪一個。"],
+["探す","さがす","尋找","駅の近くでアパートを探しています。","我在找車站附近的公寓。"],
+["増える","ふえる","增加","最近、外国人の観光客が増えました。","最近外國觀光客變多了。"],
+["減る","へる","減少","運動を始めてから、体重が三キロ減りました。","開始運動後，體重減了三公斤。"],
+["壊れる","こわれる","壞掉","パソコンが壊れて、仕事ができません。","電腦壞了，沒辦法工作。"],
+["汚れる","よごれる","弄髒","雨の中を歩いたら、靴が汚れてしまいました。","在雨中走路，鞋子弄髒了。"],
+["冷める","さめる","變涼；（熱情）冷卻","冷めないうちに、どうぞ召し上がってください。","請趁熱享用。"],
+["遅れる","おくれる","遲到、延誤","事故で電車が三十分遅れました。","因為事故，電車誤點了三十分鐘。"],
+["失敗","しっぱい","失敗","失敗しても、またやり直せばいいです。","就算失敗了，重新來過就好。"],
+["成功","せいこう","成功","みんなのおかげで、イベントは成功しました。","多虧大家，活動成功了。"],
+["習慣","しゅうかん","習慣","寝る前に本を読むのが習慣です。","睡前看書是我的習慣。"],
+["趣味","しゅみ","興趣","私の趣味は写真を撮ることです。","我的興趣是拍照。"],
+["機会","きかい","機會","日本人と話す機会があまりありません。","我不太有和日本人說話的機會。"],
+["理由","りゆう","理由","会社を辞めた理由を教えてください。","請告訴我你辭職的理由。"],
+["意味","いみ","意思、意義","この言葉はどういう意味ですか。","這個詞是什麼意思？"],
+["気持ち","きもち","心情、感覺","彼の気持ちがよく分かります。","我很能理解他的心情。"],
+["様子","ようす","樣子、情況","今日は友達の様子が少し変でした。","今天朋友的樣子有點奇怪。"],
+["場合","ばあい","情況、場合","雨の場合、イベントは中止です。","下雨的話，活動取消。"],
+["都合","つごう","方便與否、安排","明日の午後は都合がいいですか。","明天下午方便嗎？"],
+["具合","ぐあい","（身體等的）狀況","具合が悪いので、今日は休みます。","身體不舒服，今天請假。"],
+["締め切り","しめきり","截止期限","レポートの締め切りは金曜日です。","報告的截止日是星期五。"],
+["残業","ざんぎょう","加班","今週は毎日残業しています。","這週每天都在加班。"],
+["給料","きゅうりょう","薪水","給料が上がったら、新しいカメラを買いたいです。","加薪的話，我想買新相機。"],
+["会議","かいぎ","會議","三時から会議があります。","三點開始有會議。"],
+["引っ越し","ひっこし","搬家","来月、引っ越しをする予定です。","預計下個月搬家。"],
+["家賃","やちん","房租","東京は家賃が高いです。","東京的房租很貴。"],
+["近所","きんじょ","附近、鄰居","近所に新しいカフェができました。","附近開了一家新的咖啡廳。"],
+["お釣り","おつり","找零","お釣りが足りないみたいです。","找的錢好像不夠。"],
+["領収書","りょうしゅうしょ","收據","領収書をいただけますか。","可以給我收據嗎？"],
+["乗り換え","のりかえ","轉乘","新宿で乗り換えが必要です。","需要在新宿轉車。"],
+["渋滞","じゅうたい","塞車","道が渋滞していて、遅れそうです。","路上塞車，看來會遲到。"],
+["天気予報","てんきよほう","天氣預報","天気予報によると、明日は雨だそうです。","根據天氣預報，明天好像會下雨。"],
+["すっかり","","完全地、徹底地","約束をすっかり忘れていました。","我完全忘了約定。"],
+["なかなか","","相當；（接否定）總是不…","バスがなかなか来ません。","公車遲遲不來。"],
+["ちゃんと","","好好地、確實地","ご飯をちゃんと食べていますか。","有好好吃飯嗎？"],
+["やっぱり","","果然；還是","やっぱり家が一番落ち着きます。","果然還是家裡最自在。"],
+["せっかく","","難得、特地","せっかく来たのに、店が休みでした。","難得來了，店卻公休。"],
+["ついでに","","順便","コンビニに行くついでに、牛乳を買ってきて。","去便利商店時順便買牛奶回來。"],
+["たまに","","偶爾","たまに自分で料理を作ります。","偶爾會自己做菜。"],
+["ずっと","","一直；…得多","朝からずっと雨が降っています。","從早上一直在下雨。"],
+["もうすぐ","","快要、即將","もうすぐ春休みです。","快要放春假了。"],
+["さっき","","剛才","さっき田中さんから電話がありました。","剛才田中先生打電話來。"],
+["なるべく","","盡量","なるべく早く返事をください。","請盡快回覆。"],
+["きっと","","一定","明日はきっと晴れるでしょう。","明天一定會放晴吧。"],
+["わざわざ","","特地、專程","わざわざ来てくれて、ありがとう。","謝謝你特地過來。"],
+["うっかり","","不小心、一時疏忽","うっかり傘を電車に忘れました。","不小心把傘忘在電車上了。"],
+["ぎりぎり","","勉強、剛好趕上","締め切りにぎりぎり間に合いました。","勉強趕上了截止期限。"],
 ];
 const PHRASES = [
 ["ちょっと聞いてもいいですか","ちょっときいてもいいですか","可以問一下嗎？"],
@@ -357,7 +466,7 @@ const PHRASES = [
 ["どちらでも構いません","どちらでもかまいません","哪個都可以"],
 ];
 const ITEMS = {};
-VOCAB.forEach((v,i)=>ITEMS['w'+i]={id:'w'+i,type:'word',jp:v[0],kana:v[1],zh:v[2]});
+VOCAB.forEach((v,i)=>ITEMS['w'+i]={id:'w'+i,type:'word',jp:v[0],kana:v[1],zh:v[2],ex:v[3]||'',exZh:v[4]||''});
 PHRASES.forEach((v,i)=>ITEMS['s'+i]={id:'s'+i,type:'phrase',jp:v[0],kana:v[1],zh:v[2]});
 const ALL = Object.keys(ITEMS);
 const NEW_WORDS = 5, NEW_PHRASES = 3, MASTER_IV = 21;
@@ -485,11 +594,32 @@ function renderLib(){
   $('list').innerHTML = ids.length ? ids.map(id => {
     const it = ITEMS[id];
     const sub = it.type==='word' ? `${it.kana ? it.kana+' · ' : ''}${it.zh}` : it.zh;
-    return `<div class="row"><i class="st ${status(id)}"></i>
+    return `<div class="row" data-id="${id}"><i class="st ${status(id)}"></i>
       <div class="rmain"><div class="rjp">${it.jp}<button class="spk" data-say="${id}" aria-label="發音">${IC.spk}</button></div><div class="rzh">${sub}</div></div>
-      <button class="bm" data-bm="${id}" aria-label="收藏">${isSaved(id)?IC.bmOn:IC.bmOff}</button></div>`;
+      <button class="bm" data-bm="${id}" aria-label="收藏">${isSaved(id)?IC.bmOn:IC.bmOff}</button><span class="chev">›</span></div>`;
   }).join('') : '<div class="empty">還沒有收藏的內容<br>在卡片或列表上點書籤就能加入</div>';
 }
+
+/* ================= 單字詳細頁 ================= */
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function markWord(it){   // 例句中標出這個單字（動詞變化時標出詞幹）
+  const ex = esc(it.ex);
+  for (const k of [it.jp, it.jp.slice(0,-1)]) if (k && ex.includes(k)) return ex.replace(k, `<mark>${k}</mark>`);
+  return ex;
+}
+let detailId = null;
+function openDetail(id){
+  detailId = id; const it = ITEMS[id], c = S.cards[id];
+  $('dJp').textContent = it.jp; $('dJp').classList.toggle('long', it.jp.length > 6);
+  $('dKana').textContent = it.kana; $('dKana').classList.toggle('hidden', !it.kana);
+  $('dZh').textContent = it.zh;
+  $('dExBox').classList.toggle('hidden', !it.ex);
+  if (it.ex){ $('dEx').innerHTML = markWord(it); $('dExZh').textContent = it.exZh; }
+  $('dBm').innerHTML = isSaved(id) ? IC.bmOn : IC.bmOff;
+  $('dSt').textContent = !c ? '還沒學過' : `下次複習：${c.due === td() ? '今天' : c.due}` + (c.lapses ? ` · 答錯過 ${c.lapses} 次` : '');
+  $('sheet').classList.remove('hidden');
+}
+function closeDetail(){ $('sheet').classList.add('hidden'); detailId = null; stopSpeak(); }
 
 const missIds = () => ALL.filter(id => S.cards[id] && S.cards[id].lapses > 0).sort((a,b)=>S.cards[b].lapses-S.cards[a].lapses);
 const learnedIds = () => ALL.filter(id => S.cards[id]);
@@ -570,6 +700,8 @@ function nextCard(){
   $('verdict').className = 'verdict hidden';
   $('fkana').textContent = it.kana; $('fkana').classList.toggle('hidden', !it.kana);
   $('fzh').textContent = it.zh;
+  $('fex').classList.toggle('hidden', !it.ex);
+  $('fex').innerHTML = it.ex ? `<div class="exjp">${markWord(it)}</div><div class="exzh">${esc(it.exZh)}</div>` : '';
   setPrompt(it.jp, false);
 
   if (step.step === 'learn'){
@@ -671,10 +803,10 @@ let jaVoice = null, toastTimer = null;
 function loadVoice(){ if (!hasTTS) return; const vs = speechSynthesis.getVoices().filter(v => /^ja/i.test(v.lang)); jaVoice = vs.find(v => /Nanami|Kyoko|Google|O-ren|Haruka|Ayumi/.test(v.name)) || vs[0] || null; }
 if (hasTTS){ loadVoice(); speechSynthesis.onvoiceschanged = loadVoice; }
 function stopSpeak(){ if (hasTTS) speechSynthesis.cancel(); audio.pause(); }
-function speak(id){
-  if (!id) return;
+function speak(id){ if (id) speakText(ITEMS[id].jp); }
+function speakText(text){
+  if (!text) return;
   stopSpeak(); loadVoice();
-  const text = ITEMS[id].jp;
   if (jaVoice){                                  // 裝置有日文語音 → 用本機語音
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP'; u.voice = jaVoice; u.rate = .9;
@@ -695,8 +827,15 @@ document.querySelectorAll('#nav button').forEach(b => b.onclick = () => go(b.dat
 $('seg').onclick = e => { const b = e.target.closest('button'); if (b){ libFilter = b.dataset.f; renderLib(); } };
 $('list').onclick = e => {
   const s = e.target.closest('[data-say]'); if (s) return speak(s.dataset.say);
-  const b = e.target.closest('[data-bm]'); if (b){ toggleSave(b.dataset.bm); renderLib(); }
+  const b = e.target.closest('[data-bm]'); if (b){ toggleSave(b.dataset.bm); return renderLib(); }
+  const r = e.target.closest('[data-id]'); if (r) openDetail(r.dataset.id);
 };
+$('dSay').innerHTML = IC.spk; $('dExSay').innerHTML = IC.spk;
+$('sbg').onclick = closeDetail;
+$('dSay').onclick = () => speak(detailId);
+$('dExSay').onclick = () => speakText(ITEMS[detailId].ex);
+$('dBm').onclick = () => { toggleSave(detailId); $('dBm').innerHTML = isSaved(detailId) ? IC.bmOn : IC.bmOff; renderLib(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && detailId) closeDetail(); });
 $('start').onclick = () => startSession('daily');
 $('more').onclick = () => { S.today.newIds.push(...pickNew('word', 3), ...pickNew('phrase', 2)); save(); startSession('daily'); };
 $('qWord').onclick = () => startSession('practice', shuffle(ALL.filter(id=>ITEMS[id].type==='word')).slice(0,10));
