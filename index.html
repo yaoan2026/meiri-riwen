@@ -804,19 +804,36 @@ function loadVoice(){ if (!hasTTS) return; const vs = speechSynthesis.getVoices(
 if (hasTTS){ loadVoice(); speechSynthesis.onvoiceschanged = loadVoice; }
 function stopSpeak(){ if (hasTTS) speechSynthesis.cancel(); audio.pause(); }
 function speak(id){ if (id) speakText(ITEMS[id].jp); }
+// 預先錄好的真人感神經語音：audio/<FNV-1a 雜湊>.mp3（由 gen_audio.py 產生）
+function audioKey(text){
+  let h = 0x811c9dc5;
+  for (const b of new TextEncoder().encode(text)){ h ^= b; h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(16).padStart(8, '0');
+}
+let speakTry = 0, speakingText = '';
 function speakText(text){
   if (!text) return;
-  stopSpeak(); loadVoice();
-  if (jaVoice){                                  // 裝置有日文語音 → 用本機語音
+  stopSpeak();
+  speakingText = text; speakTry = 0;
+  audio.src = `audio/${audioKey(text)}.mp3`;       // 1. 優先：預錄音檔
+  audio.play().catch(() => {});                     // 被下一次播放打斷時不提示
+}
+function speakFallback(text){
+  loadVoice();
+  if (jaVoice){                                     // 2. 裝置的日文語音
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP'; u.voice = jaVoice; u.rate = .9;
     return speechSynthesis.speak(u);
   }
-  // 沒有日文語音時改用線上日文語音，絕不使用中文語音唸漢字
+  speakTry = 2;                                     // 3. 線上日文語音，絕不使用中文語音唸漢字
   audio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=' + encodeURIComponent(text);
-  audio.play().catch(() => {});   // 被下一次播放打斷或自動播放限制時不提示
+  audio.play().catch(() => {});
 }
-audio.onerror = () => { if (audio.src) toast('無法播放日文發音：請確認網路連線，或在 Windows 設定 → 時間與語言 → 語音 中安裝日文語音'); };
+audio.onerror = () => {
+  if (!audio.src || !speakingText) return;
+  if (speakTry === 0){ speakTry = 1; return speakFallback(speakingText); }   // 沒有預錄檔（例如新加的單字）
+  toast('無法播放日文發音：請確認網路連線，或在 Windows 設定 → 時間與語言 → 語音 中安裝日文語音');
+};
 function toast(msg){
   const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('hidden'), 4000);
