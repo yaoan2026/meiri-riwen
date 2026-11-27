@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0b0d12">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#f4efe6">
 <meta name="referrer" content="no-referrer">
 <meta name="apple-mobile-web-app-title" content="每日日文">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -15,183 +18,226 @@
 <title>每日日文</title>
 <style>
   :root{
-    --bg:#0b0d12; --s1:#161921; --s2:#1f232c; --line:#272b35;
-    --ink:#eef0f4; --sub:#8b919c; --dim:#5d636e;
-    --blue:#4a7dff; --flame:#ff8a3d; --red:#ff5a5f; --green:#3ecf8e; --amber:#f5b942;
-    --jp:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Noto Sans JP","Meiryo",sans-serif;
+    --bg:#f4efe6; --s1:#fffcf6; --s2:#efe8db; --line:#e4dccd;
+    --ink:#3d3a33; --sub:#8c8576; --dim:#b3ab9b;
+    --sage:#8ea583; --sage-d:#6f8766; --sage-l:#e3ead9;
+    --terra:#e0906f; --terra-d:#c4704f; --terra-l:#f7e1d5;
+    --sand:#e8c58f; --red:#d9675a; --red-d:#b44f43; --red-l:#f6dcd6;
+    --round:"Zen Maru Gothic","Hiragino Maru Gothic ProN","M PLUS Rounded 1c","PingFang TC","Microsoft JhengHei",sans-serif;
+    --jp:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{background:var(--bg);color:var(--ink)}
-  body{font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;min-height:100dvh;display:flex;justify-content:center}
+  body{font-family:var(--round);min-height:100dvh;display:flex;justify-content:center;-webkit-user-select:none;user-select:none}
   .app{width:100%;max-width:440px;min-height:100dvh;position:relative}
   .hidden{display:none!important}
   button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   svg{display:block}
 
-  .page{padding:calc(18px + env(safe-area-inset-top)) 18px calc(96px + env(safe-area-inset-bottom))}
-  .ptitle{font-size:28px;font-weight:700;margin:6px 0 18px}
-  .sec{font-size:15px;font-weight:600;margin:22px 0 10px}
-  .card{background:var(--s1);border-radius:16px}
+  .page{padding:calc(22px + env(safe-area-inset-top)) 20px calc(100px + env(safe-area-inset-bottom))}
+  .ptitle{font-size:26px;font-weight:700;margin:8px 0 18px}
+  .sec{font-size:17px;font-weight:700;margin:26px 0 12px;display:flex;align-items:baseline;gap:6px}
+  .sec small{font-size:12px;font-weight:500;color:var(--sub)}
+  .card{background:var(--s1);border:1.5px solid var(--line);border-radius:18px}
 
-  /* top bar */
-  .topbar{display:flex;justify-content:space-between;align-items:center}
+  /* 3D 按鈕（Duolingo 風） */
+  .btn{width:100%;padding:15px;border-radius:16px;background:var(--sage);color:#fff;font-size:16px;font-weight:700;letter-spacing:.05em;
+    box-shadow:0 4px 0 var(--sage-d);transition:transform .06s,box-shadow .06s;margin-bottom:4px}
+  .btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--sage-d)}
+  .btn:disabled{opacity:.45;transform:none;box-shadow:0 4px 0 var(--sage-d)}
+  .btn.ng{background:var(--red);box-shadow:0 4px 0 var(--red-d)}
+  .btn.ng:active{box-shadow:0 0 0 var(--red-d)}
+  .btn2{width:100%;padding:13px;border-radius:16px;background:var(--s1);border:1.5px solid var(--line);font-size:14px;font-weight:700;color:var(--sub);
+    box-shadow:0 3px 0 var(--line);transition:transform .06s,box-shadow .06s;margin-top:10px}
+  .btn2:active,.press:active{transform:translateY(3px);box-shadow:0 0 0 var(--line)}
+  .press{box-shadow:0 3px 0 var(--line);transition:transform .06s,box-shadow .06s}
+
+  /* 今日：問候 */
+  .hero{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
   .date{font-size:13px;color:var(--sub)}
-  .pill{display:flex;align-items:center;gap:5px;background:var(--s1);border-radius:999px;padding:6px 12px 6px 9px;font-weight:600;font-variant-numeric:tabular-nums}
-  .pill svg{width:16px;height:16px}
-  .pill.cold{color:var(--sub)}
+  .hello{font-size:28px;font-weight:700;line-height:1.3;margin-top:6px;font-family:var(--jp)}
+  .hello2{font-size:14px;color:var(--sub);margin-top:4px}
+  .avatar{width:58px;height:58px;border-radius:50%;background:var(--s1);border:1.5px solid var(--line);display:grid;place-items:center;flex:none;position:relative}
+  .avatar img{width:50px;height:50px}
+  .streak{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:var(--terra);color:#fff;
+    font-size:12px;font-weight:700;padding:2px 8px 2px 6px;border-radius:999px;border:2px solid var(--bg);white-space:nowrap}
+  .streak svg{width:12px;height:12px}
+  .streak.cold{background:var(--dim)}
 
-  /* week */
-  .week{display:flex;justify-content:space-between;padding:14px 14px 12px;margin-top:4px}
-  .day{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:11px;color:var(--sub)}
-  .dot{width:28px;height:28px;border-radius:50%;background:var(--s2);display:grid;place-items:center}
-  .dot.on{background:var(--flame)}
-  .dot.on svg{width:14px;height:14px}
-  .dot.today{box-shadow:inset 0 0 0 1.5px var(--flame)}
+  /* 今日：進度卡 */
+  .pcard{margin-top:22px;padding:18px;display:flex;gap:10px;align-items:flex-end;overflow:hidden}
+  .pc-l{flex:1;min-width:0}
+  .pc-l b{font-size:17px}
+  .pc-l .s{display:block;font-size:12px;color:var(--sub);margin:3px 0 14px}
+  .bar{height:8px;background:var(--s2);border-radius:4px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--sage);border-radius:4px;transition:width .4s}
+  .pc-l .t{display:block;font-size:12px;color:var(--sub);margin-top:8px;font-variant-numeric:tabular-nums}
+  .plant{width:130px;flex:none;margin:-6px -6px -10px 0}
 
-  /* task */
-  .task{padding:18px}
-  .task .lbl{font-size:12px;color:var(--sub);letter-spacing:.05em}
-  .task h2{font-size:20px;font-weight:700;margin:4px 0 16px}
-  .counts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
-  .count{background:var(--s2);border-radius:12px;padding:12px 8px;text-align:center}
-  .count b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
-  .count span{font-size:12px;color:var(--sub)}
-  .count.rev b{color:var(--amber)} .count.nw b{color:var(--blue)}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;max-height:96px;overflow:hidden}
-  .chip{font-family:var(--jp);font-size:13px;line-height:20px;padding:5px 10px;border-radius:999px;background:var(--s2);color:#cfd3da;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .chip.new{background:rgba(74,125,255,.15);color:#8eaeff}
-  .btn{width:100%;padding:15px;border-radius:14px;background:var(--blue);color:#fff;font-size:16px;font-weight:600}
-  .btn:active{transform:scale(.98)}
-  .btn:disabled{opacity:.4}
-  .btn2{width:100%;padding:13px;border-radius:14px;background:var(--s2);font-size:14px;color:#cfd3da;margin-top:10px}
-  .donebox{text-align:center;padding:6px 0 14px}
-  .donebox .ck{width:52px;height:52px;border-radius:50%;background:rgba(62,207,142,.15);color:var(--green);display:grid;place-items:center;margin:0 auto 10px;font-size:26px}
-  .donebox p{color:var(--sub);font-size:14px}
+  /* 今日：任務 */
+  .tasks{overflow:hidden}
+  .trow{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1.5px solid var(--line)}
+  .trow:last-child{border-bottom:0}
+  .cb{width:22px;height:22px;border-radius:50%;border:2px solid var(--dim);flex:none;display:grid;place-items:center}
+  .trow.done .cb{background:var(--sage);border-color:var(--sage)}
+  .trow.done .cb::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+  .trow.done b{color:var(--sub);text-decoration:line-through;text-decoration-color:var(--dim)}
+  .trow div{flex:1}
+  .trow b{font-size:15px;display:block}
+  .trow span{font-size:12px;color:var(--sub)}
+  .trow em{font-style:normal;font-weight:700;font-size:15px;color:var(--terra-d);font-variant-numeric:tabular-nums}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 16px;max-height:96px;overflow:hidden}
+  .chip{font-family:var(--jp);font-size:13px;line-height:20px;padding:5px 11px;border-radius:999px;background:var(--s2);color:var(--ink);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chip.new{background:var(--terra-l);color:var(--terra-d)}
+  .donebox{text-align:center;padding:18px 0 6px}
+  .donebox .ck{width:56px;height:56px;border-radius:50%;background:var(--sage-l);color:var(--sage-d);display:grid;place-items:center;margin:0 auto 10px;font-size:26px;font-weight:700}
+  .donebox b{font-size:17px}
+  .donebox p{color:var(--sub);font-size:13px;margin-top:4px}
 
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .stat{padding:14px}
-  .stat b{font-size:20px;font-variant-numeric:tabular-nums}
-  .stat span{display:block;font-size:12px;color:var(--sub);margin-top:2px}
+  /* 今日：活動 */
+  .actv{padding:18px}
+  .rings{display:flex;align-items:center;gap:18px}
+  .rings svg{width:124px;height:124px;flex:none}
+  .rleg{flex:1;display:flex;flex-direction:column;gap:10px}
+  .rleg div{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)}
+  .rleg i{width:10px;height:10px;border-radius:50%;flex:none}
+  .rleg b{margin-left:auto;color:var(--ink);font-variant-numeric:tabular-nums}
+  .days{display:flex;justify-content:space-between;margin-top:18px;padding-top:16px;border-top:1.5px solid var(--line)}
+  .day{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--sub)}
+  .day b{width:32px;height:32px;border-radius:50%;background:var(--s2);display:grid;place-items:center;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .day.on b{background:var(--sage);color:#fff}
+  .day.today b{box-shadow:0 0 0 2px var(--terra)}
+  .day.today{color:var(--terra-d);font-weight:700}
 
-  /* library */
-  .seg{display:flex;background:var(--s1);border-radius:12px;padding:4px;margin-bottom:14px}
-  .seg button{flex:1;padding:9px;border-radius:9px;font-size:14px;color:var(--sub)}
-  .seg button.on{background:var(--s2);color:var(--ink);font-weight:600}
+  /* 詞庫 */
+  .seg{display:flex;background:var(--s2);border-radius:14px;padding:4px;margin-bottom:14px}
+  .seg button{flex:1;padding:9px;border-radius:11px;font-size:14px;color:var(--sub);font-weight:500}
+  .seg button.on{background:var(--s1);color:var(--ink);font-weight:700;box-shadow:0 2px 0 var(--line)}
   .list{overflow:hidden}
-  .row{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--line)}
+  .row{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1.5px solid var(--line)}
   .row:last-child{border-bottom:0}
-  .st{width:7px;height:7px;border-radius:50%;background:var(--line);flex:none}
-  .st.l{background:var(--blue)} .st.m{background:var(--green)}
+  .row[data-id]{cursor:pointer}
+  .row[data-id]:active{background:var(--s2)}
+  .st{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none;display:inline-block}
+  .st.l{background:var(--terra)} .st.m{background:var(--sage)}
   .rmain{flex:1;min-width:0}
-  .rjp{font-family:var(--jp);font-size:16px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .rjp{font-family:var(--jp);font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px}
   .rzh{font-size:12px;color:var(--sub);margin-top:3px}
   .spk{color:var(--sub);padding:2px}
   .spk svg{width:15px;height:15px}
-  .bm{color:var(--blue);padding:4px}
+  .bm{color:var(--terra);padding:4px}
   .bm svg{width:18px;height:18px}
-  .empty{padding:34px 14px;text-align:center;color:var(--sub);font-size:14px}
+  .chev{color:var(--dim);font-size:18px;margin-left:-4px}
+  .empty{padding:34px 14px;text-align:center;color:var(--sub);font-size:14px;line-height:1.7}
   .legend{display:flex;gap:14px;font-size:12px;color:var(--sub);margin:-4px 2px 12px}
   .legend span{display:flex;align-items:center;gap:6px}
+  mark{background:none;color:var(--terra-d);font-weight:700}
 
-  /* practice */
+  /* 練習 */
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .tile{padding:14px;text-align:left;display:flex;flex-direction:column;gap:14px}
-  .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-family:var(--jp);font-weight:700;color:#fff;font-size:17px}
+  .tile{padding:16px;text-align:left;display:flex;flex-direction:column;gap:14px}
+  .ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-family:var(--jp);font-weight:700;color:#fff;font-size:18px}
   .tile b{font-size:15px}
   .tile span{font-size:12px;color:var(--sub);font-weight:400;display:block;margin-top:2px}
-  .prow{display:flex;align-items:center;gap:12px;padding:14px;width:100%;text-align:left;margin-bottom:10px}
-  .prow .ci{width:38px;height:38px;border-radius:50%;background:var(--s2);display:grid;place-items:center;flex:none}
+  .prow{display:flex;align-items:center;gap:12px;padding:14px;width:100%;text-align:left;margin-bottom:12px}
+  .prow .ci{width:40px;height:40px;border-radius:50%;background:var(--s2);display:grid;place-items:center;flex:none}
   .prow .ci svg{width:18px;height:18px}
   .prow b{font-size:15px;display:block}
   .prow span{font-size:12px;color:var(--sub)}
   .prow .n{margin-left:auto;font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
-  .prow:disabled{opacity:.45}
+  .prow:disabled{opacity:.5}
+  .sw{margin-left:auto;width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;flex:none;transition:background .2s}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:transform .2s}
+  .sw.on{background:var(--sage)} .sw.on::after{transform:translateX(18px)}
+  .foot{margin-top:26px;text-align:center}
+  .foot button{font-size:12px;color:var(--dim);text-decoration:underline;text-underline-offset:3px}
 
-  /* nav */
-  .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;padding:8px 18px calc(10px + env(safe-area-inset-bottom));background:rgba(11,13,18,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;z-index:5}
-  .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--dim);padding:6px 0}
-  .nav button svg{width:22px;height:22px}
-  .nav button.on{color:var(--ink)}
-  .nav button.on .nb{background:var(--s2)}
-  .nb{padding:4px 16px;border-radius:999px}
+  /* 底部導覽 */
+  .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;padding:8px 18px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(255,252,246,.94);backdrop-filter:blur(12px);border-top:1.5px solid var(--line);display:flex;z-index:5}
+  .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--dim);padding:5px 0;font-weight:500}
+  .nav button svg{width:23px;height:23px}
+  .nav button.on{color:var(--sage-d);font-weight:700}
+  .nav button.on .nb{background:var(--sage-l)}
+  .nb{padding:4px 18px;border-radius:999px;transition:background .2s}
 
-  /* study */
+  /* 學習畫面 */
   .study{position:fixed;inset:0;background:var(--bg);z-index:10;display:flex;justify-content:center}
-  .sin{width:100%;max-width:440px;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}
+  .sin{width:100%;max-width:440px;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 20px calc(18px + env(safe-area-inset-bottom))}
   .shead{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-  .x{width:34px;height:34px;border-radius:50%;background:var(--s1);display:grid;place-items:center;color:var(--sub);flex:none}
-  .x svg{width:16px;height:16px}
-  .prog{flex:1;height:6px;background:var(--s1);border-radius:3px;overflow:hidden}
-  .prog i{display:block;height:100%;background:var(--blue);border-radius:3px;transition:width .3s}
-  .left{font-size:13px;color:var(--sub);min-width:24px;text-align:right;font-variant-numeric:tabular-nums}
-  .flash{flex:1;background:var(--s1);border-radius:22px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;min-height:320px;cursor:pointer}
-  .tag{position:absolute;top:16px;left:18px;font-size:12px;color:var(--sub);background:var(--s2);padding:4px 9px;border-radius:999px}
-  .tag.new{color:#8eaeff;background:rgba(74,125,255,.15)}
+  .x{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--sub);flex:none}
+  .x svg{width:18px;height:18px}
+  .prog{flex:1;height:14px;background:var(--s2);border-radius:7px;overflow:hidden}
+  .prog i{display:block;height:100%;background:var(--sage);border-radius:7px;transition:width .35s;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+  .left{font-size:13px;color:var(--sub);min-width:24px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+  .flash{flex:1;background:var(--s1);border:1.5px solid var(--line);border-radius:22px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;min-height:230px;box-shadow:0 4px 0 var(--line)}
+  .tag{position:absolute;top:16px;left:18px;font-size:12px;color:var(--sub);background:var(--s2);padding:4px 10px;border-radius:999px;font-weight:500}
+  .tag.new{color:var(--terra-d);background:var(--terra-l)}
   .ftools{position:absolute;top:10px;right:10px;display:flex;gap:2px}
   .ftools button{padding:8px;color:var(--sub)}
-  .ftools button svg{width:19px;height:19px}
-  .ftools .bm{color:var(--blue)}
-  .jp{font-family:var(--jp);font-size:42px;font-weight:600;line-height:1.35}
-  .jp.long{font-size:24px;line-height:1.55}
-  .ans{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);width:100%}
-  .kana{font-family:var(--jp);font-size:17px;color:#aab0bb}
-  .zh{font-size:20px;margin-top:10px;font-weight:600}
-  .flash{cursor:default;min-height:230px}
+  .ftools button svg{width:20px;height:20px}
+  .ftools .bm{color:var(--terra)}
   .qlabel{font-size:13px;color:var(--sub);margin-bottom:12px}
+  .jp{font-family:var(--jp);font-size:42px;font-weight:700;line-height:1.35}
+  .jp.long{font-size:24px;line-height:1.55}
   .zhq{font-size:24px;font-weight:700;line-height:1.5}
-  .verdict{margin-top:16px;font-size:14px;font-weight:600}
-  .verdict.ok{color:var(--green)} .verdict.ng{color:var(--red)}
-  .verdict small{display:block;font-weight:400;color:var(--sub);margin-top:4px;font-family:var(--jp)}
-  .actions{margin-top:14px;display:flex;flex-direction:column;gap:8px}
-  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .opts.one{grid-template-columns:1fr}
-  .opt{padding:14px 12px;border-radius:14px;background:var(--s1);font-size:15px;text-align:center;border:1.5px solid transparent;line-height:1.4}
-  .opts.one .opt{text-align:left;font-family:var(--jp);font-size:15px}
-  .opt:active{transform:scale(.98)}
-  .opt.right{border-color:var(--green);background:rgba(62,207,142,.12);color:var(--green)}
-  .opt.wrong{border-color:var(--red);background:rgba(255,90,95,.12);color:var(--red)}
-  .opt:disabled{cursor:default}
-  .inp{width:100%;padding:15px 16px;border-radius:14px;background:var(--s1);border:1.5px solid var(--line);color:var(--ink);font-size:18px;font-family:var(--jp);outline:none}
-  .inp:focus{border-color:var(--blue)}
-  .pv{font-family:var(--jp);font-size:14px;color:var(--sub);min-height:20px;padding:0 4px}
-  .two{display:grid;grid-template-columns:1fr 2fr;gap:8px}
-  .two .btn2{margin:0}
-  .row[data-id]{cursor:pointer}
-  .row[data-id]:active{background:var(--s2)}
-  .chev{color:var(--dim);font-size:18px;margin-left:-4px}
-  mark{background:none;color:var(--flame);font-weight:700}
-  .fex{margin-top:16px;padding:12px 14px;background:var(--s2);border-radius:12px;text-align:left}
+  .ans{margin-top:20px;padding-top:18px;border-top:1.5px dashed var(--line);width:100%}
+  .kana{font-family:var(--jp);font-size:17px;color:var(--sub)}
+  .zh{font-size:20px;margin-top:8px;font-weight:700}
+  .fex{margin-top:16px;padding:12px 14px;background:var(--s2);border-radius:14px;text-align:left}
   .fex .exjp{font-family:var(--jp);font-size:15px;line-height:1.6}
   .fex .exzh{font-size:12px;color:var(--sub);margin-top:3px}
+  .verdict{margin-top:16px;font-size:15px;font-weight:700}
+  .verdict.ok{color:var(--sage-d)} .verdict.ng{color:var(--red)}
+  .verdict small{display:block;font-weight:400;color:var(--sub);margin-top:4px;font-family:var(--jp)}
+  .actions{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opts.one{grid-template-columns:1fr}
+  .opt{padding:14px 12px;border-radius:16px;background:var(--s1);font-size:15px;text-align:center;border:2px solid var(--line);line-height:1.4;font-weight:500;
+    box-shadow:0 3px 0 var(--line);transition:transform .06s,box-shadow .06s}
+  .opt:active{transform:translateY(3px);box-shadow:0 0 0 var(--line)}
+  .opts.one .opt{text-align:left;font-family:var(--jp)}
+  .opt.right{border-color:var(--sage);background:var(--sage-l);color:var(--sage-d);box-shadow:0 3px 0 var(--sage)}
+  .opt.wrong{border-color:var(--red);background:var(--red-l);color:var(--red);box-shadow:0 3px 0 var(--red)}
+  .opt:disabled{cursor:default}
+  .inp{width:100%;padding:15px 16px;border-radius:16px;background:var(--s1);border:2px solid var(--line);color:var(--ink);font-size:18px;font-family:var(--jp);outline:none;-webkit-user-select:text;user-select:text}
+  .inp:focus{border-color:var(--sage)}
+  .pv{font-family:var(--jp);font-size:14px;color:var(--sub);min-height:20px;padding:0 4px;margin-top:-4px}
+  .two{display:grid;grid-template-columns:1fr 2fr;gap:10px;align-items:start}
+  .two .btn2{margin:0}
+  .shake{animation:shake .35s}
+  @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+  .pop{animation:pop .3s}
+  @keyframes pop{50%{transform:scale(1.04)}}
+
+  .finish{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+  .finish .flame svg{width:76px;height:76px}
+  .finish .num{font-size:54px;font-weight:700;color:var(--terra);line-height:1.1;font-variant-numeric:tabular-nums}
+  .finish h3{font-family:var(--jp);font-size:24px;margin-top:14px}
+  .finish p{color:var(--sub)}
+
+  /* 單字詳細頁 */
   .sheet{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center}
-  .sbg{position:absolute;inset:0;background:rgba(0,0,0,.55);animation:fade .2s}
-  .spanel{position:relative;width:100%;max-width:440px;background:var(--s1);border-radius:22px 22px 0 0;padding:10px 20px calc(26px + env(safe-area-inset-bottom));animation:up .22s ease-out;max-height:85dvh;overflow:auto}
+  .sbg{position:absolute;inset:0;background:rgba(61,58,51,.35);animation:fade .2s}
+  .spanel{position:relative;width:100%;max-width:440px;background:var(--s1);border-radius:24px 24px 0 0;padding:10px 20px calc(26px + env(safe-area-inset-bottom));animation:up .22s ease-out;max-height:85dvh;overflow:auto}
   @keyframes up{from{transform:translateY(40px);opacity:0}} @keyframes fade{from{opacity:0}}
-  .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 16px}
+  .grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px}
   .dtop{display:flex;align-items:flex-start;gap:10px}
   .djp{font-family:var(--jp);font-size:34px;font-weight:700;line-height:1.3;flex:1}
   .djp.long{font-size:22px}
-  .dkana{font-family:var(--jp);color:#aab0bb;font-size:16px;margin-top:4px}
+  .dkana{font-family:var(--jp);color:var(--sub);font-size:16px;margin-top:4px}
   .dtools{display:flex;gap:2px}
   .dtools button,.exsay{padding:8px;color:var(--sub)}
   .dtools svg,.exsay svg{width:20px;height:20px}
-  .dtools .bm{color:var(--blue)}
-  .dzh{font-size:19px;font-weight:600;margin-top:10px}
+  .dtools .bm{color:var(--terra)}
+  .dzh{font-size:19px;font-weight:700;margin-top:10px}
   .dlbl{font-size:12px;color:var(--sub);letter-spacing:.06em;margin:22px 0 8px}
-  .dex{background:var(--s2);border-radius:14px;padding:14px 10px 14px 16px;display:flex;gap:6px;align-items:flex-start}
+  .dex{background:var(--s2);border-radius:16px;padding:14px 10px 14px 16px;display:flex;gap:6px;align-items:flex-start}
   .dex .exjp{font-family:var(--jp);font-size:17px;line-height:1.65;flex:1}
   .dex .exzh{font-size:13px;color:var(--sub);margin-top:6px}
   .exsay{flex:none;margin-top:-2px}
   .dst{font-size:12px;color:var(--dim);margin-top:18px}
-  .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--s2);color:var(--ink);font-size:13px;padding:10px 14px;border-radius:12px;max-width:340px;text-align:center;z-index:20;box-shadow:0 6px 24px rgba(0,0,0,.4)}
-
-  .finish{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
-  .finish .flame svg{width:72px;height:72px}
-  .finish .num{font-size:52px;font-weight:800;color:var(--flame);line-height:1.1;font-variant-numeric:tabular-nums}
-  .finish h3{font-family:var(--jp);font-size:24px;margin-top:14px}
-  .finish p{color:var(--sub)}
-  .foot{margin-top:26px;text-align:center}
-  .foot button{font-size:12px;color:var(--dim);text-decoration:underline;text-underline-offset:3px}
+  .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:var(--s1);font-size:13px;padding:10px 14px;border-radius:12px;max-width:340px;text-align:center;z-index:40}
 </style>
 </head>
 <body>
@@ -199,38 +245,70 @@
 
   <!-- ===== 今日 ===== -->
   <section class="page" id="pg-today">
-    <div class="topbar">
-      <div class="date" id="date"></div>
-      <div class="pill" id="pill"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3.5 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5.3 1.6 1.2 2.6 2.2 2.6C10.5 7.5 11 4.5 12 2z"/></svg><span id="streak">0</span></div>
+    <header class="hero">
+      <div>
+        <div class="date" id="date"></div>
+        <h1 class="hello" id="hello">こんにちは、</h1>
+        <div class="hello2" id="hello2">今天也一起加油吧</div>
+      </div>
+      <div class="avatar">
+        <img src="avatar.svg" alt="">
+        <div class="streak" id="pill"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3.5 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5.3 1.6 1.2 2.6 2.2 2.6C10.5 7.5 11 4.5 12 2z"/></svg><span id="streak">0</span></div>
+      </div>
+    </header>
+
+    <div class="card pcard">
+      <div class="pc-l">
+        <b>每日進度</b>
+        <span class="s" id="pcSub"></span>
+        <div class="bar"><i id="pcBar" style="width:0"></i></div>
+        <span class="t" id="pcTxt"></span>
+      </div>
+      <svg class="plant" viewBox="0 0 130 100" aria-hidden="true">
+        <ellipse cx="66" cy="95" rx="58" ry="5" fill="#ebe2d2"/>
+        <rect x="6" y="85" width="30" height="7" rx="2.5" fill="#e8c58f"/>
+        <rect x="9" y="78" width="25" height="7" rx="2.5" fill="#8ea583"/>
+        <rect x="12" y="71" width="20" height="7" rx="2.5" fill="#e0906f"/>
+        <g fill="none" stroke="#6f8766" stroke-width="2.4" stroke-linecap="round">
+          <path d="M70 68 C70 52 66 38 58 24"/><path d="M70 68 C72 52 80 40 92 32"/><path d="M70 68 C66 58 54 52 44 50"/><path d="M70 66 C72 58 78 52 84 50"/>
+        </g>
+        <ellipse cx="56" cy="20" rx="9" ry="17" transform="rotate(-22 56 20)" fill="#8ea583"/>
+        <ellipse cx="96" cy="28" rx="9" ry="16" transform="rotate(42 96 28)" fill="#a5b998"/>
+        <ellipse cx="40" cy="47" rx="8" ry="14" transform="rotate(-62 40 47)" fill="#a5b998"/>
+        <ellipse cx="86" cy="47" rx="7" ry="12" transform="rotate(52 86 47)" fill="#8ea583"/>
+        <rect x="49" y="64" width="42" height="9" rx="3" fill="#c4704f"/>
+        <path d="M52 72 h36 l-5 22 h-26 z" fill="#e0906f"/>
+        <rect x="104" y="80" width="16" height="14" rx="3.5" fill="#fffcf6" stroke="#cfc4b1" stroke-width="1.5"/>
+        <path d="M120 84 q5 0 5 4 t-5 4" fill="none" stroke="#cfc4b1" stroke-width="1.5"/>
+      </svg>
     </div>
-    <div class="ptitle" id="hello">今日</div>
 
-    <div class="card week" id="week"></div>
+    <div class="sec">今日任務 <small>今日のタスク</small></div>
+    <div id="todo">
+      <div class="card tasks">
+        <div class="trow" id="tRev"><i class="cb"></i><div><b>複習</b><span>依記憶曲線排好的內容</span></div><em id="cRev">0</em></div>
+        <div class="trow" id="tWord"><i class="cb"></i><div><b>新單字</b><span>N4–N3 單字與例句</span></div><em id="cWord">0</em></div>
+        <div class="trow" id="tPhrase"><i class="cb"></i><div><b>新會話</b><span>日常會話短句</span></div><em id="cPhrase">0</em></div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <button class="btn" id="start">開始</button>
+    </div>
+    <div id="doneBox" class="hidden">
+      <div class="card donebox"><div class="ck">✓</div><b>今天完成了！</b><p>連勝已記錄，明天見</p></div>
+      <button class="btn2" id="more">再多學 5 個新內容</button>
+    </div>
 
-    <div class="card task" style="margin-top:12px">
-      <div class="lbl">今日任務</div>
-      <div id="todo">
-        <h2 id="taskTitle">開始今天的學習</h2>
-        <div class="counts">
-          <div class="count rev"><b id="cRev">0</b><span>要複習</span></div>
-          <div class="count nw"><b id="cWord">0</b><span>新單字</span></div>
-          <div class="count nw"><b id="cPhrase">0</b><span>新會話</span></div>
+    <div class="sec">本週紀錄 <small>アクティビティ</small></div>
+    <div class="card actv">
+      <div class="rings">
+        <svg viewBox="0 0 124 124" id="rings"></svg>
+        <div class="rleg">
+          <div><i style="background:var(--terra)"></i>今日進度<b id="rToday">0%</b></div>
+          <div><i style="background:var(--sage)"></i>已學<b><span id="sLearn">0</span> / <span id="sTotal">0</span></b></div>
+          <div><i style="background:var(--sand)"></i>已熟練<b id="sMaster">0</b></div>
         </div>
-        <div class="chips" id="chips"></div>
-        <button class="btn" id="start">開始</button>
       </div>
-      <div id="doneBox" class="hidden">
-        <h2>今天完成了</h2>
-        <div class="donebox"><div class="ck">✓</div><p>連勝已記錄，明天見！</p></div>
-        <button class="btn2" id="more">再多學 5 個新內容</button>
-      </div>
-    </div>
-
-    <div class="sec">進度</div>
-    <div class="stats">
-      <div class="card stat"><b id="sLearn">0</b><span>已學</span></div>
-      <div class="card stat"><b id="sMaster">0</b><span>已熟練</span></div>
-      <div class="card stat"><b id="sTotal">0</b><span>總數</span></div>
+      <div class="days" id="week"></div>
     </div>
   </section>
 
@@ -251,23 +329,28 @@
     <div class="ptitle">練習</div>
     <div class="sec" style="margin-top:0">快速練習</div>
     <div class="tiles">
-      <button class="card tile" id="qWord"><div class="ico" style="background:var(--flame)">字</div><div><b>單字</b><span>隨機 10 題</span></div></button>
-      <button class="card tile" id="qPhrase"><div class="ico" style="background:var(--red)">話</div><div><b>會話</b><span>隨機 10 句</span></div></button>
+      <button class="card tile press" id="qWord"><div class="ico" style="background:var(--terra)">字</div><div><b>單字</b><span>隨機 10 題</span></div></button>
+      <button class="card tile press" id="qPhrase"><div class="ico" style="background:var(--sage)">話</div><div><b>會話</b><span>隨機 10 句</span></div></button>
     </div>
     <div class="sec">複習</div>
-    <button class="card prow" id="pSaved">
-      <div class="ci" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></div>
+    <button class="card prow press" id="pSaved">
+      <div class="ci" style="color:var(--terra)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></div>
       <div><b>已收藏的內容</b><span>練習你標記起來的單字與句子</span></div><div class="n" id="nSaved">0</div>
     </button>
-    <button class="card prow" id="pMiss">
+    <button class="card prow press" id="pMiss">
       <div class="ci" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
-      <div><b>錯題本</b><span>曾經按過「忘了」的內容</span></div><div class="n" id="nMiss">0</div>
+      <div><b>錯題本</b><span>曾經答錯的內容</span></div><div class="n" id="nMiss">0</div>
     </button>
-    <button class="card prow" id="pAll">
-      <div class="ci" style="color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"/></svg></div>
+    <button class="card prow press" id="pAll">
+      <div class="ci" style="color:var(--sage-d)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"/></svg></div>
       <div><b>隨機回顧</b><span>從已學過的內容抽 15 張</span></div><div class="n" id="nAll">0</div>
     </button>
-    <p style="font-size:12px;color:var(--dim);margin-top:6px">練習模式不會改變複習排程，也不影響連勝。</p>
+    <p style="font-size:12px;color:var(--dim);margin-top:2px">練習模式不會改變複習排程，也不影響連勝。</p>
+    <div class="sec">設定</div>
+    <button class="card prow press" id="hapBtn">
+      <div class="ci" style="color:var(--terra-d)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M3 9v6M21 9v6"/></svg></div>
+      <div><b>按鈕震動</b><span>點按鈕、答對答錯時震動</span></div><i class="sw" id="hapSw"></i>
+    </button>
     <div class="foot"><button id="reset">清除所有進度</button></div>
   </section>
 
@@ -490,8 +573,10 @@ function ensureToday(){
   if (!S.today || S.today.date !== td()){
     S.today = {date: td(), newIds: []};
     S.today.newIds = [...pickNew('word', NEW_WORDS), ...pickNew('phrase', NEW_PHRASES)];
+    S.today.planned = S.today.newIds.length + dueIds().length;   // 今日進度的分母
     save();
   }
+  if (S.today.planned == null){ S.today.planned = newIds().length + dueIds().length; save(); }
 }
 const dueIds = () => ALL.filter(id => S.cards[id] && S.cards[id].due <= td());
 const newIds = () => S.today.newIds.filter(id => !S.cards[id]);
@@ -528,9 +613,9 @@ function markDone(){
 
 /* ================= 圖示 ================= */
 const IC = {
-  flame:'<svg viewBox="0 0 24 24" fill="#ff8a3d"><path d="M12 2c1 3.5 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5.3 1.6 1.2 2.6 2.2 2.6C10.5 7.5 11 4.5 12 2z"/></svg>',
+  flame:'<svg viewBox="0 0 24 24" fill="#e0906f"><path d="M12 2c1 3.5 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5.3 1.6 1.2 2.6 2.2 2.6C10.5 7.5 11 4.5 12 2z"/></svg>',
   flameW:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2c1 3.5 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5.3 1.6 1.2 2.6 2.2 2.6C10.5 7.5 11 4.5 12 2z"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:72px;height:72px"><circle cx="12" cy="12" r="10"/><path d="m7.5 12 3 3 6-6"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="#8ea583" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:72px;height:72px"><circle cx="12" cy="12" r="10"/><path d="m7.5 12 3 3 6-6"/></svg>',
   bmOn:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>',
   bmOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>',
   spk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>',
@@ -550,41 +635,60 @@ function go(p){
 }
 function render(){ if (page==='today') renderToday(); else if (page==='lib') renderLib(); else renderPrac(); }
 
+function ring(r, pct, color){
+  const c = 2 * Math.PI * r, p = Math.max(0, Math.min(1, pct));
+  return `<circle cx="62" cy="62" r="${r}" fill="none" stroke="var(--s2)" stroke-width="10"/>
+    <circle cx="62" cy="62" r="${r}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
+      stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 62 62)" style="transition:stroke-dasharray .5s"/>`;
+}
 function renderToday(){
   ensureToday();
   const now = new Date(), wd = '日一二三四五六';
-  $('date').textContent = `${now.getMonth()+1}月${now.getDate()}日 星期${wd[now.getDay()]}`;
+  $('date').textContent = `${now.getMonth()+1}月${now.getDate()}日（${wd[now.getDay()]}）`;
   const h = now.getHours();
-  $('hello').textContent = h<11 ? 'おはよう' : h<18 ? 'こんにちは' : 'こんばんは';
-  const st = currentStreak();
+  $('hello').textContent = (h<11 ? 'おはよう' : h<18 ? 'こんにちは' : 'こんばんは') + '、';
+  const st = currentStreak(), doneToday = S.lastDone === td();
   $('streak').textContent = st;
-  $('pill').classList.toggle('cold', S.lastDone !== td());
-
-  let w = '';
-  for (let i=6;i>=0;i--){
-    const d = addDays(td(), -i), on = S.doneDates.includes(d);
-    w += `<div class="day"><div class="dot ${on?'on':''} ${i===0&&!on?'today':''}">${on?IC.flameW:''}</div>${i===0?'今天':wd[new Date(d+'T00:00:00').getDay()]}</div>`;
-  }
-  $('week').innerHTML = w;
+  $('pill').classList.toggle('cold', !doneToday);
 
   const due = dueIds(), nw = newIds();
-  const doneToday = S.lastDone === td(), nothing = due.length + nw.length === 0;
+  const nWord = nw.filter(id=>ITEMS[id].type==='word').length, nPhrase = nw.length - nWord;
+  const remain = due.length + nw.length, nothing = remain === 0;
+  const planned = Math.max(S.today.planned || 0, remain);
+  const pct = doneToday && nothing ? 1 : planned ? (planned - remain) / planned : 0;
+  $('hello2').textContent = doneToday ? '今天的份量完成了，好棒！' : st ? `連續 ${st} 天了，今天也繼續吧` : '今天也一起加油吧';
+  $('pcSub').textContent = st ? `🔥 連勝 ${st} 天` : '完成今日任務就能開始連勝';
+  $('pcBar').style.width = (pct*100) + '%';
+  $('pcTxt').textContent = `${planned - remain}/${planned} 張 · ${Math.round(pct*100)}%`;
+
   $('todo').classList.toggle('hidden', nothing && doneToday);
   $('doneBox').classList.toggle('hidden', !(nothing && doneToday));
-  $('cRev').textContent = due.length;
-  $('cWord').textContent = nw.filter(id=>ITEMS[id].type==='word').length;
-  $('cPhrase').textContent = nw.filter(id=>ITEMS[id].type==='phrase').length;
-  const mins = Math.max(1, Math.round((due.length*8 + nw.length*15)/60));
-  $('taskTitle').textContent = nothing ? '目前沒有排程的內容' : doneToday ? `還有 ${due.length+nw.length} 張可以繼續` : `${due.length+nw.length} 張卡片 · 約 ${mins} 分鐘`;
+  $('cRev').textContent = due.length ? `${due.length} 個` : '';
+  $('cWord').textContent = nWord ? `${nWord} 個` : '';
+  $('cPhrase').textContent = nPhrase ? `${nPhrase} 句` : '';
+  const planWord = S.today.newIds.some(id=>ITEMS[id].type==='word'), planPhrase = S.today.newIds.some(id=>ITEMS[id].type==='phrase');
+  $('tRev').classList.toggle('done', !due.length);
+  $('tRev').querySelector('span').textContent = due.length ? '依記憶曲線排好的內容' : '目前沒有待複習的內容';
+  $('tWord').classList.toggle('done', planWord && !nWord);
+  $('tPhrase').classList.toggle('done', planPhrase && !nPhrase);
+  $('tWord').classList.toggle('hidden', !planWord);
+  $('tPhrase').classList.toggle('hidden', !planPhrase);
   $('chips').innerHTML = [...due.map(id=>[id,0]), ...nw.map(id=>[id,1])]
     .map(([id,n]) => `<span class="chip ${n?'new':''}">${ITEMS[id].jp}</span>`).join('');
   $('start').disabled = nothing;
-  $('start').textContent = nothing ? '全部學完了' : doneToday ? '繼續' : '開始今日學習';
+  const mins = Math.max(1, Math.round((due.length*8 + nw.length*20)/60));
+  $('start').textContent = nothing ? '全部學完了' : doneToday ? '繼續學習' : `開始今日學習 · 約 ${mins} 分鐘`;
 
-  const learned = Object.keys(S.cards).length;
-  $('sLearn').textContent = learned;
-  $('sMaster').textContent = ALL.filter(id => status(id)==='m').length;
-  $('sTotal').textContent = ALL.length;
+  const learned = Object.keys(S.cards).length, mastered = ALL.filter(id => status(id)==='m').length;
+  $('sLearn').textContent = learned; $('sTotal').textContent = ALL.length; $('sMaster').textContent = mastered;
+  $('rToday').textContent = Math.round(pct*100) + '%';
+  $('rings').innerHTML = ring(52, pct, 'var(--terra)') + ring(38, learned/ALL.length, 'var(--sage)') + ring(24, mastered/ALL.length, 'var(--sand)');
+  let w = '';
+  for (let i=6;i>=0;i--){
+    const d = addDays(td(), -i), dd = new Date(d+'T00:00:00');
+    w += `<div class="day ${S.doneDates.includes(d)?'on':''} ${i===0?'today':''}">${wd[dd.getDay()]}<b>${dd.getDate()}</b></div>`;
+  }
+  $('week').innerHTML = w;
   $('more').classList.toggle('hidden', learned >= ALL.length);
 }
 
@@ -624,6 +728,7 @@ function closeDetail(){ $('sheet').classList.add('hidden'); detailId = null; sto
 const missIds = () => ALL.filter(id => S.cards[id] && S.cards[id].lapses > 0).sort((a,b)=>S.cards[b].lapses-S.cards[a].lapses);
 const learnedIds = () => ALL.filter(id => S.cards[id]);
 function renderPrac(){
+  renderHap();
   $('nSaved').textContent = S.saved.length; $('pSaved').disabled = !S.saved.length;
   $('nMiss').textContent = missIds().length; $('pMiss').disabled = !missIds().length;
   $('nAll').textContent = learnedIds().length; $('pAll').disabled = !learnedIds().length;
@@ -768,7 +873,9 @@ function settle(ok, note){
   v.className = 'verdict ' + (ok ? 'ok' : 'ng');
   v.innerHTML = (ok ? '✓ 答對了' : '✗ 答錯了') + (note ? `<small>${note}</small>` : '');
   if (q.type === 'type') $('actions').innerHTML = '';
-  $('actions').insertAdjacentHTML('beforeend', '<button class="btn" id="aNext">繼續</button>');
+  $('actions').insertAdjacentHTML('beforeend', `<button class="btn ${ok ? '' : 'ng'}" id="aNext">繼續</button>`);
+  const f = $('flash'); f.classList.remove('shake','pop'); void f.offsetWidth; f.classList.add(ok ? 'pop' : 'shake');
+  haptic(ok ? 'ok' : 'ng');
   speak(cur);
 }
 function advance(){
@@ -784,6 +891,7 @@ function advance(){
 }
 function finish(){
   $('sCard').classList.add('hidden'); $('sDone').classList.remove('hidden');
+  haptic('done');
   const acc = stats.n ? Math.round(stats.ok / stats.n * 100) : 100;
   if (mode === 'daily'){
     const first = markDone();
@@ -839,6 +947,33 @@ function toast(msg){
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('hidden'), 4000);
 }
 
+/* ================= 震動回饋 ================= */
+// Android：navigator.vibrate；iPhone（iOS 18+ Safari）不支援 vibrate，改用點擊隱藏的開關觸發系統觸覺回饋
+const HAP = {tap:10, ok:[18], ng:[40,60,40], done:[20,50,20,50,60]};
+let hapLabel = null;
+function iosTick(){
+  if (!hapLabel){
+    hapLabel = document.createElement('label'); hapLabel.style.cssText = 'position:fixed;left:-99px;opacity:0;pointer-events:none';
+    const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); hapLabel.appendChild(i);
+    document.body.appendChild(hapLabel);
+  }
+  hapLabel.click();
+}
+function haptic(kind){
+  if (S.haptics === false) return;
+  const pat = HAP[kind] || HAP.tap;
+  if (navigator.vibrate) return navigator.vibrate(pat);
+  iosTick();
+  if (Array.isArray(pat) && pat.length > 2) setTimeout(iosTick, 110);
+}
+document.addEventListener('click', e => {
+  if (e.target.closest('label') === hapLabel && hapLabel) return;
+  const b = e.target.closest('button, .row[data-id]');
+  if (b && !b.disabled && !b.classList.contains('opt') && b.id !== 'aCheck') haptic('tap');
+}, true);
+function renderHap(){ $('hapSw').classList.toggle('on', S.haptics !== false); }
+$('hapBtn').onclick = () => { S.haptics = S.haptics === false; save(); renderHap(); if (S.haptics) haptic('ok'); };
+
 /* ================= 事件 ================= */
 document.querySelectorAll('#nav button').forEach(b => b.onclick = () => go(b.dataset.p));
 $('seg').onclick = e => { const b = e.target.closest('button'); if (b){ libFilter = b.dataset.f; renderLib(); } };
@@ -854,7 +989,7 @@ $('dExSay').onclick = () => speakText(ITEMS[detailId].ex);
 $('dBm').onclick = () => { toggleSave(detailId); $('dBm').innerHTML = isSaved(detailId) ? IC.bmOn : IC.bmOff; renderLib(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && detailId) closeDetail(); });
 $('start').onclick = () => startSession('daily');
-$('more').onclick = () => { S.today.newIds.push(...pickNew('word', 3), ...pickNew('phrase', 2)); save(); startSession('daily'); };
+$('more').onclick = () => { const add = [...pickNew('word', 3), ...pickNew('phrase', 2)]; S.today.newIds.push(...add); S.today.planned = (S.today.planned||0) + add.length; save(); startSession('daily'); };
 $('qWord').onclick = () => startSession('practice', shuffle(ALL.filter(id=>ITEMS[id].type==='word')).slice(0,10));
 $('qPhrase').onclick = () => startSession('practice', shuffle(ALL.filter(id=>ITEMS[id].type==='phrase')).slice(0,10));
 $('pSaved').onclick = () => startSession('practice', shuffle(S.saved));
